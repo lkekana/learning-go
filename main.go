@@ -75,9 +75,17 @@ func main() {
 			}
 			fmt.Println("Edited task name to:", newName)
 		case "list":
+			if len(tasks.Tasks) == 0 {
+				fmt.Println("No tasks found.")
+				return
+			}
 			fmt.Println("\nTasks:")
 			fmt.Println(tasks.String())
 		case "tasks":
+			if len(tasks.Tasks) == 0 {
+				fmt.Println("No tasks found.")
+				return
+			}
 			fmt.Println("\nTasks:")
 			fmt.Println(tasks.String())
 		default:

@@ -12,10 +12,10 @@ import (
 )
 
 type Task struct {
-	ID string;
-	Name string;
-	Completed bool;
-	InsertTime int64;
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Completed  bool   `json:"completed"`
+	InsertTime int64  `json:"insert_time"`
 }
 
 func (t Task) String() string {
@@ -29,12 +29,12 @@ func (t Task) String() string {
 }
 
 type Tasks struct {
-	tasks []Task;
+	Tasks []Task `json:"tasks"`
 }
 
 func (t Tasks) String() string {
 	result := ""
-	for _, task := range t.tasks {
+	for _, task := range t.Tasks {
 		result += fmt.Sprintf("%v\n", task.String())
 	}
 	return result
@@ -43,10 +43,10 @@ func (t Tasks) String() string {
 func (t *Tasks) Init() {
 	tasks, err := readJSONFile()
 	if err != nil {
-		fmt.Println("Error reading tasks from file:", err)
-		t.tasks = []Task{}
+		// fmt.Println("Error reading tasks from file:", err)
+		t.Tasks = []Task{}
 	} else {
-		t.tasks = tasks
+		t.Tasks = tasks
 	}
 }
 
@@ -87,30 +87,30 @@ func (t *Tasks) AddTask(name string) {
 		Completed: false,
 		InsertTime: time.Now().Unix(),
 	}
-	t.tasks = append(t.tasks, task)
-	writeJSONFile(t.tasks)
+	t.Tasks = append(t.Tasks, task)
+	writeJSONFile(t.Tasks)
 }
 
 func (t *Tasks) GetTask(id string) (Task, error) {
-	for i, task := range t.tasks {
+	for i, task := range t.Tasks {
 		if task.ID == id {
-			return t.tasks[i], nil
+			return t.Tasks[i], nil
 		}
 	}
 	return Task{}, errors.New("Task not found")
 }
 
 func (t *Tasks) GetTasks() []Task {
-	return t.tasks
+	return t.Tasks
 }
 
 func (t *Tasks) RemoveTask(id string) (Task, error) {
 	var task Task = Task{};
-	for i, task := range t.tasks {
+	for i, task := range t.Tasks {
 		if task.ID == id {
-			task = t.tasks[i]
-			t.tasks = append(t.tasks[:i], t.tasks[i+1:]...)
-			writeJSONFile(t.tasks)
+			task = t.Tasks[i]
+			t.Tasks = append(t.Tasks[:i], t.Tasks[i+1:]...)
+			writeJSONFile(t.Tasks)
 			return task, nil
 		}
 	}
@@ -118,11 +118,11 @@ func (t *Tasks) RemoveTask(id string) (Task, error) {
 }
 
 func (t *Tasks) EditTask(id string, name string) (Task, error) {
-	for i, task := range t.tasks {
+	for i, task := range t.Tasks {
 		if task.ID == id {
-			t.tasks[i].Name = name
-			writeJSONFile(t.tasks)
-			return t.tasks[i], nil
+			t.Tasks[i].Name = name
+			writeJSONFile(t.Tasks)
+			return t.Tasks[i], nil
 		}
 	}
 	return Task{}, errors.New("Task not found")
