@@ -1,29 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"strings"
 
 	"todos"
 )
 
-func addTaskCLI(args []string, tasks *todos.Tasks) {
-	if len(args) < 3 {
-		fmt.Println("Please provide a task name.")
-		return
-	}
-	task := strings.Join(args, " ")
+func addTaskCLI(task string, tasks *todos.Tasks) {
 	tasks.AddTask(task)
 	fmt.Println("Added task:", task)
 }
 
-func removeTaskCLI(args []string, tasks *todos.Tasks) {
-	if len(args) < 3 {
-		fmt.Println("Please provide a task ID to remove.")
-		return
-	}
-	taskID := args[2]
+func removeTaskCLI(taskID string, tasks *todos.Tasks) {
 	t, err := tasks.RemoveTask(taskID)
 	if err != nil {
 		fmt.Println("Error removing task:", err)
@@ -32,12 +22,7 @@ func removeTaskCLI(args []string, tasks *todos.Tasks) {
 	fmt.Println("Removed task:", t)
 }
 
-func toggleTaskCLI(args []string, tasks *todos.Tasks) {
-	if len(args) < 3 {
-		fmt.Println("Please provide a task ID to toggle.")
-		return
-	}
-	taskID := args[2]
+func toggleTaskCLI(taskID string, tasks *todos.Tasks) {
 	t, err := tasks.GetTask(taskID)
 	if err != nil {
 		fmt.Println("Error finding task:", err)
@@ -47,13 +32,7 @@ func toggleTaskCLI(args []string, tasks *todos.Tasks) {
 	fmt.Println("Toggled task:", t)
 }
 
-func editTaskCLI(args []string, tasks *todos.Tasks) {
-	if len(args) < 4 {
-		fmt.Println("Please provide a task ID and new name to edit.")
-		return
-	}
-	taskID := args[2]
-	newName := strings.Join(args[3:], " ")
+func editTaskCLI(taskID, newName string, tasks *todos.Tasks) {
 	t, err := tasks.EditTask(taskID, newName)
 	if err != nil {
 		fmt.Println("Error editing task:", err)
@@ -72,45 +51,73 @@ func listTasksCLI(tasks *todos.Tasks) {
 }
 
 func main() {
-    args := os.Args
+	// Define flags
+	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
+	addTask := addCmd.String("task", "", "Task to add")
 
-	if len(args) <= 1 {
-		// early return
+	removeCmd := flag.NewFlagSet("remove", flag.ExitOnError)
+	removeTaskID := removeCmd.String("id", "", "Task ID to remove")
+
+	toggleCmd := flag.NewFlagSet("toggle", flag.ExitOnError)
+	toggleTaskID := toggleCmd.String("id", "", "Task ID to toggle")
+
+	editCmd := flag.NewFlagSet("edit", flag.ExitOnError)
+	editTaskID := editCmd.String("id", "", "Task ID to edit")
+	editNewName := editCmd.String("name", "", "New name for the task")
+
+	listCmd := flag.NewFlagSet("list", flag.ExitOnError)
+	tasksCmd := flag.NewFlagSet("tasks", flag.ExitOnError)
+
+	serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
+
+	if len(os.Args) < 2 {
+		fmt.Println("Expected a command")
 		return
 	}
 
-	// Print all arguments
-	// fmt.Printf("Args: %v (type %T)", args, args)
-
-	cmd := args[1]
-	// fmt.Println("Command:", cmd)
-
+	cmd := os.Args[1]
 	tasks := todos.Tasks{}
 	tasks.Init()
 
 	switch cmd {
-		case "add":
-			addTaskCLI(args, &tasks)
-		case "remove":
-			removeTaskCLI(args, &tasks)
-		case "toggle":
-			toggleTaskCLI(args, &tasks)
-		case "edit":
-			editTaskCLI(args, &tasks)
-		case "list":
-			listTasksCLI(&tasks)
-		case "tasks":
-			listTasksCLI(&tasks)
-		case "serve":
-			todos.Serve()
-		default:
-			fmt.Println("Unknown command")
+	case "add":
+		addCmd.Parse(os.Args[2:])
+		if *addTask == "" {
+			fmt.Println("Please provide a task to add using -task flag.")
+			return
+		}
+		addTaskCLI(*addTask, &tasks)
+	case "remove":
+		removeCmd.Parse(os.Args[2:])
+		if *removeTaskID == "" {
+			fmt.Println("Please provide a task ID to remove using -id flag.")
+			return
+		}
+		removeTaskCLI(*removeTaskID, &tasks)
+	case "toggle":
+		toggleCmd.Parse(os.Args[2:])
+		if *toggleTaskID == "" {
+			fmt.Println("Please provide a task ID to toggle using -id flag.")
+			return
+		}
+		toggleTaskCLI(*toggleTaskID, &tasks)
+	case "edit":
+		editCmd.Parse(os.Args[2:])
+		if *editTaskID == "" || *editNewName == "" {
+			fmt.Println("Please provide a task ID and new name using -id and -name flags.")
+			return
+		}
+		editTaskCLI(*editTaskID, *editNewName, &tasks)
+	case "list":
+		listCmd.Parse(os.Args[2:])
+		listTasksCLI(&tasks)
+	case "tasks":
+		tasksCmd.Parse(os.Args[2:])
+		listTasksCLI(&tasks)
+	case "serve":
+		serveCmd.Parse(os.Args[2:])
+		todos.Serve()
+	default:
+		fmt.Println("Unknown command")
 	}
-
-    // // Print arguments excluding the program name (os.Args[1:])
-    // if len(args) > 1 {
-    //     fmt.Println("Arguments excluding program name:", args[1:])
-    // } else {
-    //     fmt.Println("No arguments provided.")
-    // }
 }
