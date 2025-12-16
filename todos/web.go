@@ -14,7 +14,7 @@ func Serve() {
 	app.Get("/tasks/:id", getTask)
 	app.Post("/tasks", addTask)
 	app.Delete("/tasks/:id", removeTask)
-	app.Patch("/tasks/:id/toggle", toggleTask)
+	app.Patch("/tasks/:id", toggleTask)
 
 	app.Listen("localhost:8080")
 }
