@@ -88,6 +88,8 @@ func main() {
 			}
 			fmt.Println("\nTasks:")
 			fmt.Println(tasks.String())
+		case "serve":
+			todos.Serve()
 		default:
 			fmt.Println("Unknown command")
 	}
